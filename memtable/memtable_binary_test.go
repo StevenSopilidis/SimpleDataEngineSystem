@@ -35,6 +35,8 @@ func TestBinaryMemtable(t *testing.T) {
 	){
 		"TestValidGet":   testValidGet,
 		"TestInvalidGet": testInvalidGet,
+		"TestIsEmpty":    testIsEmpty,
+		"TestRemoveAll":  testRemoveAll,
 	} {
 		t.Run(scenario, func(t *testing.T) {
 			table := setUpTest(t)
@@ -52,4 +54,25 @@ func testValidGet(t *testing.T, m *BinaryMemtable) {
 
 func testInvalidGet(t *testing.T, m *BinaryMemtable) {
 	require.Nil(t, m.Get([]byte("InvalidKey")))
+}
+
+func testIsEmpty(t *testing.T, m *BinaryMemtable) {
+	require.True(t, m.IsEmpty())
+	populateMemTable(t, m)
+	require.False(t, m.IsEmpty())
+}
+
+func testRemoveAll(t *testing.T, m *BinaryMemtable) {
+	data := populateMemTable(t, m)
+	memtable_data := m.RemoveAll()
+	keys := make([]string, 0)
+	for k := range memtable_data {
+		keys = append(keys, k)
+	}
+	require.Equal(t, len(data), len(keys))
+	require.True(t, m.IsEmpty())
+	// check that the data is in ascending order
+	for i := 1; i < len(data); i++ {
+		require.True(t, keys[i-1] <= keys[i])
+	}
 }

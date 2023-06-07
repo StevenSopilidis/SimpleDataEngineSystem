@@ -22,6 +22,10 @@ func CreateBinaryMemtable() *BinaryMemtable {
 	}
 }
 
+func (b *BinaryMemtable) IsEmpty() bool {
+	return b.head == nil
+}
+
 func (b *BinaryMemtable) Insert(key []byte, data interface{}) {
 	if b.head == nil {
 		b.head = &node{
@@ -48,6 +52,24 @@ func recersiveInsert(head **node, key string, data interface{}) {
 
 func (b *BinaryMemtable) Get(key []byte) interface{} {
 	return recersiveGet(b.head, hk.HashStringToSHA256(key))
+}
+
+func (b *BinaryMemtable) RemoveAll() map[string]interface{} {
+	data := make(map[string]interface{})
+	recersiveRemove(b.head, &data)
+	b.head = nil
+	return data
+}
+
+func recersiveRemove(head *node, buffer *map[string]interface{}) {
+	if head == nil {
+		return
+
+	} else {
+		recersiveRemove(head.left, buffer)
+		(*buffer)[head.key] = head.data
+		recersiveRemove(head.right, buffer)
+	}
 }
 
 func recersiveGet(head *node, key string) interface{} {
