@@ -7,6 +7,8 @@ import (
 // implementation of memtable using binary search tree
 type BinaryMemtable struct {
 	head *node
+	// current size of memtable
+	currentSize int
 }
 
 type node struct {
@@ -26,7 +28,7 @@ func (b *BinaryMemtable) IsEmpty() bool {
 	return b.head == nil
 }
 
-func (b *BinaryMemtable) Insert(key []byte, data interface{}) {
+func (b *BinaryMemtable) Insert(key []byte, data []byte) {
 	if b.head == nil {
 		b.head = &node{
 			key:  hk.HashStringToSHA256(key),
@@ -35,9 +37,10 @@ func (b *BinaryMemtable) Insert(key []byte, data interface{}) {
 		return
 	}
 	recersiveInsert(&b.head, hk.HashStringToSHA256(key), data)
+	b.currentSize += len(data)
 }
 
-func recersiveInsert(head **node, key string, data interface{}) {
+func recersiveInsert(head **node, key string, data []byte) {
 	if *head == nil {
 		*head = &node{
 			key:  key,
@@ -58,6 +61,7 @@ func (b *BinaryMemtable) RemoveAll() map[string]interface{} {
 	data := make(map[string]interface{})
 	recersiveRemove(b.head, &data)
 	b.head = nil
+	b.currentSize = 0
 	return data
 }
 
@@ -83,4 +87,8 @@ func recersiveGet(head *node, key string) interface{} {
 	} else {
 		return recersiveGet(head.left, key)
 	}
+}
+
+func (b *BinaryMemtable) IsFull() bool {
+	return b.currentSize >= MaxMemTableSize
 }
