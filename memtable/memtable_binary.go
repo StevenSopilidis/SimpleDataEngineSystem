@@ -13,7 +13,7 @@ type BinaryMemtable struct {
 
 type node struct {
 	key   string
-	data  interface{}
+	data  []byte
 	left  *node
 	right *node
 }
@@ -53,19 +53,19 @@ func recersiveInsert(head **node, key string, data []byte) {
 	}
 }
 
-func (b *BinaryMemtable) Get(key []byte) interface{} {
+func (b *BinaryMemtable) Get(key []byte) []byte {
 	return recersiveGet(b.head, hk.HashStringToSHA256(key))
 }
 
-func (b *BinaryMemtable) RemoveAll() map[string]interface{} {
-	data := make(map[string]interface{})
+func (b *BinaryMemtable) RemoveAll() map[string][]byte {
+	data := make(map[string][]byte)
 	recersiveRemove(b.head, &data)
 	b.head = nil
 	b.currentSize = 0
 	return data
 }
 
-func recersiveRemove(head *node, buffer *map[string]interface{}) {
+func recersiveRemove(head *node, buffer *map[string][]byte) {
 	if head == nil {
 		return
 
@@ -76,7 +76,7 @@ func recersiveRemove(head *node, buffer *map[string]interface{}) {
 	}
 }
 
-func recersiveGet(head *node, key string) interface{} {
+func recersiveGet(head *node, key string) []byte {
 	if head == nil {
 		return nil
 	}

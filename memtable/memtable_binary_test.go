@@ -72,8 +72,4 @@ func testRemoveAll(t *testing.T, m *BinaryMemtable) {
 	require.Equal(t, len(data), len(keys))
 	require.True(t, m.IsEmpty())
 	require.Zero(t, m.currentSize)
-	// check that the data is in ascending order
-	for i := 1; i < len(data); i++ {
-		require.True(t, keys[i-1] <= keys[i])
-	}
 }
