@@ -7,8 +7,7 @@ import (
 
 // hashes string using SHA256 and returns hex representation
 func HashStringToSHA256(key []byte) string {
-	hash := sha256.New()
-	hash.Write(key)
-	hashedBytes := hash.Sum(nil)
-	return hex.EncodeToString(hashedBytes)
+	hash := sha256.Sum256([]byte(key))
+	// Convert the hash to a hexadecimal string
+	return hex.EncodeToString(hash[:])
 }

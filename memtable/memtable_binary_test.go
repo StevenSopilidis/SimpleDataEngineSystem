@@ -65,6 +65,7 @@ func testIsEmpty(t *testing.T, m *BinaryMemtable) {
 func testRemoveAll(t *testing.T, m *BinaryMemtable) {
 	data := populateMemTable(t, m)
 	memtable_data := m.RemoveAll()
+
 	keys := make([]string, 0)
 	for k := range memtable_data {
 		keys = append(keys, k)
