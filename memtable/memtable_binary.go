@@ -1,7 +1,7 @@
 package memtable
 
 import (
-	hk "github.com/StevenSopilidis/SimpleDataEngineSystem/memtable/internal"
+	hk "github.com/StevenSopilidis/SimpleDataEngineSystem/internal"
 )
 
 // implementation of memtable using binary search tree
@@ -37,7 +37,7 @@ func (b *BinaryMemtable) Insert(key []byte, data []byte) {
 		return
 	}
 	recersiveInsert(&b.head, hk.HashStringToSHA256(key), data)
-	b.currentSize += len(data)
+	b.currentSize++
 }
 
 func recersiveInsert(head **node, key string, data []byte) {

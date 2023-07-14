@@ -4,6 +4,11 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"path/filepath"
+	"sort"
+	"time"
+
+	hk "github.com/StevenSopilidis/SimpleDataEngineSystem/internal"
 
 	"github.com/google/uuid"
 )
@@ -26,6 +31,52 @@ type SegmentEntry struct {
 	Key  string
 	Len  uint16
 	Data []byte
+}
+
+func getAllFilePaths(dirPath string) []string {
+	var filePaths []string
+
+	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+		filePaths = append(filePaths, path)
+		print(path)
+		return nil
+	})
+
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+
+	return filePaths
+}
+
+// getCreationTime returns the creation time of a file
+func getCreationTime(filePath string) time.Time {
+	fileInfo, err := os.Stat(filePath)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return time.Time{}
+	}
+
+	return fileInfo.ModTime()
+}
+
+func (f *SegmentHandler) FindItem(key []byte) *SegmentEntry {
+	filePaths := getAllFilePaths("storage/segments")
+	sort.Slice(filePaths, func(i, j int) bool {
+		return getCreationTime(filePaths[i]).Before(getCreationTime(filePaths[j]))
+	})
+	for _, filePath := range filePaths {
+		fileName := filepath.Base(filePath)
+		segment, err := f.GetSegment(fileName)
+		if err != nil {
+			return nil
+		}
+		item, found := segment[hk.HashStringToSHA256(key)]
+		if found {
+			return &item
+		}
+	}
+	return nil
 }
 
 // reads a whole segment from fs
@@ -69,7 +120,6 @@ func (f *SegmentHandler) AppendSegment(data map[string][]byte) error {
 			return err
 		}
 		keyBuff := []byte(k)
-		println(k)
 		tmp = append(tmp, keyBuff...)
 		datalen := len(data[k])
 		buf := make([]byte, 2)
